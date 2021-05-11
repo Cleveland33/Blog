@@ -26,11 +26,11 @@ class BlogTests(TestCase):
         self.assertEqual(f"{self.post.author}", "testuser")
         self.assertEqual(f"{self.post.body}", "Nice body content")
 
-    def test_post_detail_view(self):
+    def test_post_list_view(self):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Nice body content")
-        self.assertTemplateUsed(response, "html.html")
+        self.assertTemplateUsed(response, "home.html")
 
     def test_post_detail_view(self):
         response = self.client.get("/post/1/")
@@ -40,8 +40,26 @@ class BlogTests(TestCase):
         self.assertContains(response, "A good title")
         self.assertTemplateUsed(response, "post_detail.html")
 
+    def test_post_create_view(self):
+        response = self.client.post(reverse("post_new"), {
+            "title": "New Title",
+            "body": "New Test",
+            "author": self.user.id
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Post.objects.last().title, "New Title")
+        self.assertEqual(Post.objects.last().body, "New Test")
 
+    def test_post_update_view(self):
+        response = self.client.post(reverse("post_edit", args="1"), {
+            "title": "Update title",
+            "body": "Update test"
+        })
+        self.assertEqual(response.status_code, 302)
 
+    def test_post_delete_view(self):
+        response = self.client.post(reverse("post_delete", args="1"))
+        self.assertEqual(response.status_code, 302)
 
 
 
